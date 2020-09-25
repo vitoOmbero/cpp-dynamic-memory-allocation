@@ -15,7 +15,7 @@ exe: main.o print_mem.o
 main.o: main.cpp
 	$(CC) $(CFLAGS) main.cpp
 
-print_mem.o: print_mem.cpp
+print_mem.o: print_mem.cpp functions.h
 	$(CC) $(CFLAGS) print_mem.cpp
 
 clean:

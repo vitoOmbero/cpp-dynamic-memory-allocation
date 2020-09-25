@@ -41,6 +41,7 @@ int main(/*int argc, char* argv[]*/)
 
     NewAlloc<MyStruct>();
     NewObj<MyStruct>();
+    NewObjInit<MyStruct>(4248);
     std::cout << "====" << std::endl;
     NewArr<MyStruct, 2>();
     std::cout << "====" << std::endl;
