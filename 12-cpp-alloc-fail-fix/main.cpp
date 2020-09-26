@@ -41,8 +41,9 @@ void NewHandler()
     std::cout << "...// some logic, wait or clear resourses..." << std::endl;
     if (c == 6)
     {
-        std::cout << "...// in this scenario we can't wait more and fall"
-                  << std::endl;
+        std::cout
+            << "...// in this scenario we can't wait more and we are falling"
+            << std::endl;
         std::terminate();
     }
 }
