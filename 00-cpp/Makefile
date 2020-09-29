@@ -5,7 +5,7 @@ DEBUG=-g
 
 CFLAGS=-c -Wall -Werror -Wpedantic -std=c++17 $(DEBUG)
 
-LDFLAGS= -Wall -std=c++11 $(DEBUG)
+LDFLAGS= -Wall -std=c++17 $(DEBUG)
 
 all: exe
 
