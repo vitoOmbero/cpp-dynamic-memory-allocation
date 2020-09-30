@@ -20,7 +20,7 @@ const char* TAG{ "[LIB.SO]" };
 const char* TAG{ "[DLL]" };
 #endif
 
-static int8_t           descriptor_counter{ -1 };
+static int8_t           descriptor_counter{ 0 };
 static const int8_t     DESCRIPTOR_COUNTER_MAX = INT8_MAX;
 static int**            ptr_arr[DESCRIPTOR_COUNTER_MAX]{};
 static DescriptorStatus stat_arr[DESCRIPTOR_COUNTER_MAX]{
@@ -33,10 +33,18 @@ static int rows_arr[DESCRIPTOR_COUNTER_MAX]{};
 #ifdef LIB_API_VER_1
 inline namespace version_1
 {
+smat_t AbortCreationSuperbMatrix(int** ptr);
+
 MANGLING smat_t CreateSuperbMatrix(size_t rows, size_t columns)
 {
     if (DESCRIPTOR_COUNTER_MAX != descriptor_counter)
-        ++descriptor_counter;
+    {
+#ifdef SUPERBMAT_DEBUG
+        std::cout << TAG << "descriptor_counter: " << (int)descriptor_counter
+                  << std::endl;
+#endif
+    }
+
     else
     {
 #ifdef SUPERBMAT_DEBUG
@@ -62,7 +70,7 @@ MANGLING smat_t CreateSuperbMatrix(size_t rows, size_t columns)
             << "The suprb matrix creation is aborted: can not alloc memory!"
             << std::endl;
 #endif
-        AbortCreationSuperbMatrix(ptr);
+        return AbortCreationSuperbMatrix(ptr);
     }
 
     for (; i < rows; ++i)
@@ -75,17 +83,19 @@ MANGLING smat_t CreateSuperbMatrix(size_t rows, size_t columns)
                       << "The suprb matrix creation is interrupted at row ["
                       << i << "]: can not alloc memory!" << std::endl;
 #endif
-            for (; i >= 0; --i)
+            for (size_t j = i; j <= 0; ++j)
             {
                 delete ptr[i];
             }
-            AbortCreationSuperbMatrix(ptr);
+            return AbortCreationSuperbMatrix(ptr);
         }
     }
 #ifdef SUPERBMAT_DEBUG
     std::cout << TAG << "One more suprb matrix is just created!" << std::endl;
+    std::cout << TAG << "descriptor_counter: " << (int)descriptor_counter
+              << std::endl;
 #endif
-
+    ++descriptor_counter;
     ptr_arr[descriptor_counter]  = ptr;
     rows_arr[descriptor_counter] = rows;
     stat_arr[descriptor_counter] = DescriptorStatus::kValid;
@@ -95,9 +105,15 @@ MANGLING smat_t CreateSuperbMatrix(size_t rows, size_t columns)
 
 smat_t AbortCreationSuperbMatrix(int** ptr)
 {
+#ifdef SUPERBMAT_DEBUG
+    std::cout << TAG << "AbortCreationSuperbMatrix" << std::endl;
+#endif
     delete[] ptr;
     ptr = nullptr;
-    --descriptor_counter;
+#ifdef SUPERBMAT_DEBUG
+    std::cout << TAG << "descriptor_counter: " << (int)descriptor_counter
+              << std::endl;
+#endif
     return smat_t(descriptor_counter);
 }
 

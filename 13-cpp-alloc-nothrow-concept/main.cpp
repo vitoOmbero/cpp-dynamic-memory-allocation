@@ -35,10 +35,23 @@ void LoadFunctions(mylib::resprov_loaded_ptrs& fpc /*out*/)
 int main(/*int argc, char* argv[]*/)
 {
     mylib::resprov_loaded_ptrs fp_container;
-
     LoadFunctions(fp_container);
 
+    std::cout << std::endl;
+    std::cout << "===========" << std::endl;
+    std::cout << "Scenario_01" << std::endl;
+    std::cout << "===========" << std::endl;
+    std::cout << std::endl;
+
     mylib::Scenario_01_No_Problems(fp_container);
+
+    std::cout << std::endl;
+    std::cout << "===========" << std::endl;
+    std::cout << "Scenario_02" << std::endl;
+    std::cout << "===========" << std::endl;
+    std::cout << std::endl;
+
+    mylib::Scenario_02_Alloc_Problems(fp_container);
 
     dlclose(handle);
 

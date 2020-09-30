@@ -7,11 +7,6 @@ echo "run executable:"
 echo -e "\n"
 echo -e "\n"
 echo -e "\n"
-echo -e "\033[0;32mrun executable again:"
-echo -e "\n"
-echo -e "\n"
-echo -e "\n"
-./test.out
 
 unset LD_LIBRARY_PATH
 
