@@ -1,4 +1,3 @@
-#include <exception>
 #include <iostream>
 
 #include "resprov.h"
@@ -40,39 +39,65 @@ MANGLING smat_t CreateSuperbMatrix(size_t rows, size_t columns)
         ++descriptor_counter;
     else
     {
-        throw DescriptorMaxException();
+#ifdef SUPERBMAT_DEBUG
+        std::cout << TAG
+                  << "Unable to create one more superb matrix. Release "
+                     "unnecessary descriptors and        try            again."
+                  << std::endl;
+#endif
+        return smat_t(descriptor_counter);
     }
 
     int** ptr = nullptr;
 
     size_t i{ 0 };
-    try
+
+    ptr = new (std::nothrow) int*[rows];
+
+    if (nullptr == ptr)
     {
-        ptr = new int*[rows];
-        for (; i < rows; ++i)
-        {
-            ptr[i] = new int[columns];
-        }
 #ifdef SUPERBMAT_DEBUG
-        std::cout << TAG << "One more suprb matrix is just created!"
-                  << std::endl;
+        std::cout
+            << TAG
+            << "The suprb matrix creation is aborted: can not alloc memory!"
+            << std::endl;
 #endif
+        AbortCreationSuperbMatrix(ptr);
     }
-    // NOTE: problem - different compiler exception implementations
-    catch (std::exception& ex)
+
+    for (; i < rows; ++i)
     {
-        --descriptor_counter;
-        std::cerr << TAG << " Exception: CreateSuperbMatrix(" << rows << ", "
-                  << columns << ") at row " << i << std::endl;
-        std::cerr << "what(): " << ex.what() << std::endl;
-        throw;
-        // NOTE: another problem - we need to delete partly initialized matrix
+        ptr[i] = new (std::nothrow) int[columns];
+        if (nullptr == ptr[i])
+        {
+#ifdef SUPERBMAT_DEBUG
+            std::cout << TAG
+                      << "The suprb matrix creation is interrupted at row ["
+                      << i << "]: can not alloc memory!" << std::endl;
+#endif
+            for (; i >= 0; --i)
+            {
+                delete ptr[i];
+            }
+            AbortCreationSuperbMatrix(ptr);
+        }
     }
+#ifdef SUPERBMAT_DEBUG
+    std::cout << TAG << "One more suprb matrix is just created!" << std::endl;
+#endif
 
     ptr_arr[descriptor_counter]  = ptr;
     rows_arr[descriptor_counter] = rows;
     stat_arr[descriptor_counter] = DescriptorStatus::kValid;
 
+    return smat_t(descriptor_counter);
+}
+
+smat_t AbortCreationSuperbMatrix(int** ptr)
+{
+    delete[] ptr;
+    ptr = nullptr;
+    --descriptor_counter;
     return smat_t(descriptor_counter);
 }
 
@@ -95,11 +120,13 @@ MANGLING void DestroySuperbMatrix(smat_t descriptor)
 {
     int** ptr = ptr_arr[descriptor];
 
-    for (int i = 0; i < rows_arr[descriptor]; ++i)
-    {
-        delete[] ptr[i];
-    }
+    if (ptr != nullptr)
+        for (int i = 0; i < rows_arr[descriptor]; ++i)
+        {
+            delete[] ptr[i];
+        }
     delete[] ptr_arr[descriptor];
+    ptr_arr[descriptor] = nullptr;
 
     stat_arr[descriptor] = DescriptorStatus::kDeleted;
     --descriptor_counter;
